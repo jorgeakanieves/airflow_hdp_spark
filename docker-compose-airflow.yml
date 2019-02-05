@@ -1,0 +1,41 @@
+version: '3'
+services:
+    postgres:
+        image: aidoc/postgres:9.6
+#        network_mode: bridge
+        networks:
+            - workbench
+        environment:
+            - POSTGRES_USER=airflow
+            - POSTGRES_PASSWORD=airflow
+            - POSTGRES_DB=airflow
+        deploy:
+          restart_policy:
+            condition: on-failure
+    webserver:
+        image: aidoc/airflow:1.9.0
+        networks:
+            - workbench
+        hostname: webserver
+        depends_on:
+            - postgres
+        environment:
+            - LOAD_EX=n
+            - EXECUTOR=Local
+        volumes:
+            - ${SPARK_CONF_PATH}/spark-defaults.conf:/usr/local/spark/conf/spark-defaults.conf
+            - ${SPARK_CONF_PATH}/log4j.properties:/usr/local/spark/conf/log4j.properties
+        ports:
+            - "8091:8091"
+        command: webserver
+        deploy:
+          restart_policy:
+            condition: on-failure
+        healthcheck:
+            test: ["CMD-SHELL", "[ -f /usr/local/airflow/airflow-webserver.pid ]"]
+            interval: 30s
+            timeout: 30s
+            retries: 3
+networks:
+  workbench:
+    external: true

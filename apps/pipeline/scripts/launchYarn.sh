@@ -1,0 +1,1 @@
+spark-submit --master yarn --deploy-mode cluster --class "com.cognitive.jene.Pdf2Ml"  --driver-java-options "-Denv=pro -DJOBS_PATH=${JOBS_PATH}" /usr/local/airflow/apps/spark/job-pdf2ml-1.0.jar
